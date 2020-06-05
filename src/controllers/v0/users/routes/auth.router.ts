@@ -81,7 +81,6 @@ router.post('/login', async (req: Request, res: Response) => {
 
 
 router.post('/', async (req: Request, res: Response) => {
-  console.log("iN THE POST");
   const email = req.body.email;
   const plainTextPassword = req.body.password;
   
@@ -92,27 +91,22 @@ router.post('/', async (req: Request, res: Response) => {
   if (!plainTextPassword) {
     return res.status(400).send({auth: false, message: 'Password is required.'});
   }
-  console.log("JUST Get User By PK");
   const user = await User.findByPk(email);
   if (user) {
     return res.status(422).send({auth: false, message: 'User already exists.'});
   }
 
   const generatedHash = await generatePassword(plainTextPassword);
-  console.log("GENEREATES PSWD HASH: " + generatedHash);
   const newUser = await new User({
     email: email,
     password_hash: generatedHash,
   });
-  console.log("JUST BEFORE USER SAVE");
   const savedUser = await newUser.save();
-  console.log("JUST JWT GENERATION");
   const jwt = generateJWT(savedUser);
   res.status(201).send({token: jwt, user: savedUser.short()});
 });
 
 router.get('/', async (req: Request, res: Response) => {
-  console.log("IN THE GET");
   res.send('auth');
 });
 
